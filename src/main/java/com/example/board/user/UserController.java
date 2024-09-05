@@ -25,8 +25,8 @@ public class UserController {
     @Operation(
             summary = "User Register", description = "회원가입", method = "POST",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "성공"),
-                    @ApiResponse(responseCode = "400", description = "잘못된 요청")
+                    @ApiResponse(responseCode = "200", description = "Register Successful"),
+                    @ApiResponse(responseCode = "400", description = "Bad Request")
             }
     )
     public ResponseEntity<String> registerUser(@RequestBody UserReqDto request) {

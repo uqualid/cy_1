@@ -1,5 +1,9 @@
 package com.example.board.user.config;
 
+import com.example.board.security.JwtAccessDeniedHandler;
+import com.example.board.security.JwtAuthenticationEntryPoint;
+import com.example.board.security.JwtFilter;
+import com.example.board.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -20,6 +25,7 @@ import java.util.List;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -31,21 +37,34 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(corsConfigure -> corsConfigure.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(customizer -> customizer.accessDeniedHandler(new JwtAccessDeniedHandler()))
+                .exceptionHandling(customizer -> customizer.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
+                .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/register", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(PERMIT_ALL_LIST).permitAll()
+                        .anyRequest().permitAll() // permitAll - authenticated
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout", "POST"))
-                        .logoutSuccessUrl("/user/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
-                );
+                .logout(AbstractHttpConfigurer::disable);
+
+//                .logout(logout -> logout
+//                        .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout", "POST"))
+//                        .logoutSuccessUrl("/user/login?logout")
+//                        .invalidateHttpSession(true)
+//                        .deleteCookies("JSESSIONID")
+//                        .permitAll()
+//                );
 
         return http.build();
     }
+
+    private static final String[] PERMIT_ALL_LIST = {
+            "/user/register",
+            "/user/login",
+            "/user/logout",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
+    };
 
     CorsConfigurationSource corsConfigurationSource() {
         final var configuration = new CorsConfiguration();

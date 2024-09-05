@@ -1,1 +1,39 @@
-spring.application.name=board
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  mvc:
+    cors:
+      mappings:
+        /api/**:
+          allowed-origins: "http://localhost:8080"
+          allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/board;MODE=MYSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+        default_batch_fetch_size: 100
+    defer-datasource-initialization: true
+
+
+  application:
+    name: board
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
