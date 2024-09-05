@@ -29,7 +29,7 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 //@NoArgsConstructor(force = true)
 @RestController
-@RequestMapping("/jwtTokenUse")
+@RequestMapping("/JwtTokenUse")
 public class UserAuthController {
     private final UserAuthService userAuthService;
     private final JwtTokenProvider jwtTokenProvider;
