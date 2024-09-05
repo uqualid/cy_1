@@ -50,4 +50,5 @@ public class UserEntity implements UserDetails {
     public String getUsername() {
         return this.userId;
     }
+
 }
