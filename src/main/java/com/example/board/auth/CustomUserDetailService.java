@@ -1,6 +1,5 @@
 package com.example.board.auth;
 
-import com.example.board.exception.UserNotFoundException;
 import com.example.board.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

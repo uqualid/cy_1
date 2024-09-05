@@ -6,7 +6,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,8 +18,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
-import static org.hibernate.query.sqm.tree.SqmNode.log;
-
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -29,15 +26,6 @@ public class JwtTokenProvider {
     private String secretKey;
 
     private final CustomUserDetailService customUserDetailService;
-
-//    public JwtTokenProvider(
-//            @Value("${jwt.secret}") String secret,
-//            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds) {
-//        this.secretKey = secret;
-//        this.accessTokenValidityInMs = tokenValidityInSeconds * 60 * 24; // 60,000ms : 1m(0.001d), 60000 * 60 * 12 = 12h
-//        this.refreshTokenValidityInMs = tokenValidityInSeconds * 60 * 24 * 2; // 60,000ms : 1m(0.001d), 60000 * 60 * 24 = 1d
-//    }
-
 
     @PostConstruct
     protected void init() {

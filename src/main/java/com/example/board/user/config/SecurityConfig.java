@@ -63,7 +63,8 @@ public class SecurityConfig {
             "/user/login",
             "/user/logout",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/JwtTokenUse/logout"
     };
 
     CorsConfigurationSource corsConfigurationSource() {

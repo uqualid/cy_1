@@ -8,7 +8,6 @@ import com.example.board.user.dto.LoginResDto;
 import com.example.board.user.entity.UserEntity;
 import com.example.board.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,22 +24,30 @@ public class UserAuthService {
     @Transactional
     public LoginResDto loginByUserIdAndPassword(LoginReqDto loginReqDto){
         UserEntity userEntity = userRepository.findByUserId(loginReqDto.getUserId());
-        // 아이디 존재 x시 exception handling
-        if(!passwordEncoder.matches(loginReqDto.getPassword(), userEntity.getPassword()))
-            throw new RuntimeException("check Password");
+        if(userEntity == null) { // 예외: 사용자가 존재하지 않을 경우
+            throw new RuntimeException("User not found with ID: " + loginReqDto.getUserId());
+        }
+
+        // 예외: 비밀번호가 일치하지 않는 경우
+        if(!passwordEncoder.matches(loginReqDto.getPassword(), userEntity.getPassword())) {
+            throw new RuntimeException("Check Password");
+        }
 
         StringBuilder expire = new StringBuilder();
         String accessToken = jwtTokenProvider.createToken(String.valueOf(userEntity.getUserId()), null, expire);
         StringBuilder refreshExpire = new StringBuilder();
         String refreshToken = jwtTokenProvider.createRefreshToken(String.valueOf(userEntity.getUserId()), null, expire);
 
-        userAuthRepository.save(UserAuthEntity.builder()
+        UserAuthEntity userAuthEntity = UserAuthEntity.builder()
                 .ownNum(userEntity.getOwnNum())
                 .userId(userEntity.getUserId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .logout(false)
-                .build());
+                .build();
+
+        UserAuthEntity savedEntity = userAuthRepository.save(userAuthEntity);
+        System.out.println("Saved UserAuthEntity: " + savedEntity);
 
         return LoginResDto.builder()
                 .ownNum(userEntity.getOwnNum())
@@ -58,9 +65,8 @@ public class UserAuthService {
                 .findFirstByUserIdAndLogout(userId, false)
                 .orElseThrow();
 
-
         auth.setLogout();
-
+        userAuthRepository.save(auth);
     }
 
     @Transactional
@@ -68,8 +74,13 @@ public class UserAuthService {
         if(jwtTokenProvider.validateToken(refreshToken)){
 
             if (jwtTokenProvider.getUserPk(refreshToken).equals(id)) {
-                UserAuthEntity auth = userAuthRepository.findByRefreshToken(refreshToken).orElseThrow(IllegalArgumentException::new);
+                UserAuthEntity auth = userAuthRepository.findByRefreshToken(refreshToken)
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+
                 UserEntity userEntity = userRepository.findByUserId(auth.getUserId());
+                if (userEntity == null || !userEntity.getUserId().equals(id) || !auth.getAccessToken().equals(accessToken)) {
+                    throw new IllegalArgumentException("Invalid token or user");
+                }
 
                 if (userEntity.getUserId().equals(id) && auth.getAccessToken().equals(accessToken)){
                     StringBuilder expire = new StringBuilder();
@@ -78,12 +89,9 @@ public class UserAuthService {
                     StringBuilder refreshExpire = new StringBuilder();
                     String newRefreshToken = jwtTokenProvider.createRefreshToken(String.valueOf(userEntity.getUserId()), null, refreshExpire);
 
-                    userAuthRepository.save(UserAuthEntity.builder()
-                                    .userId(userEntity.getUserId())
-                                    .accessToken(newAccessToken)
-                                    .refreshToken(newRefreshToken)
-                                    .logout(false)
-                            .build());
+                    auth.setAccessToken(newAccessToken);
+                    auth.setRefreshToken(newRefreshToken);
+                    userAuthRepository.save(auth);
 
                     return LoginResDto.builder()
                             .ownNum(userEntity.getOwnNum())
