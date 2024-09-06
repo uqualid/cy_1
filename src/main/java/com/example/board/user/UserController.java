@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "User Controller", description = "로그인/ 회원가입 API")
+@Tag(name = "01. User Controller", description = "로그인/ 회원가입 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping
@@ -33,9 +33,9 @@ public class UserController {
         UserResDto response = userService.registerUser(request);
         return ResponseEntity.ok("Registration successful. Redirect to /login.");
     }
-
+// JWT 적용 - UserAuthController.java 반영
     @PostMapping("/user/login")
-    @Operation(summary = "User Login", description = "User 로그인", method = "POST")
+    @Operation(summary = "User Login", description = "User 로그인", method = "POST", hidden = true)
     public ResponseEntity<String> loginUser(@RequestBody UserReqLoginDto request) {
         UserResDto user = userService.authenticateUser(request.getUserId(), request.getPassword());
 
@@ -47,7 +47,7 @@ public class UserController {
     }
 
     @PostMapping("/user/logout")
-    @Operation(summary = "User Logout", description = "User 로그아웃", method = "POST")
+    @Operation(summary = "User Logout", description = "User 로그아웃", method = "POST", hidden = true)
     public ResponseEntity<String> logoutUser() {
         // 로그아웃 로직 처리
         return ResponseEntity.ok("Logout successful");

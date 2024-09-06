@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 
 
 @Slf4j
-@Tag(name = "JWT User Controller", description = "Token 발급 로그인/로그아웃")
+@Tag(name = "02. JWT User Controller", description = "Token 발급 로그인/로그아웃")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/JwtTokenUse")
@@ -71,6 +71,7 @@ public class UserAuthController {
             @RequestHeader(value = "x-refresh-token") String refreshToken) {
 
         LoginResDto responseDto = userAuthService.refreshToken(userId, accessToken, refreshToken);
+
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 

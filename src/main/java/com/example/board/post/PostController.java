@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Post Controller", description = "게시판 API")
+@Tag(name = "03. Post Controller", description = "게시판 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping

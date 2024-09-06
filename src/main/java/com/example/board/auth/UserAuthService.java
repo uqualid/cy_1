@@ -8,11 +8,13 @@ import com.example.board.user.dto.LoginResDto;
 import com.example.board.user.entity.UserEntity;
 import com.example.board.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserAuthService {
@@ -66,7 +68,10 @@ public class UserAuthService {
                 .orElseThrow();
 
         auth.setLogout();
+
+        log.info("Logout state before save: {}", auth.getLogout());
         userAuthRepository.save(auth);
+        log.info("Logout state after save: {}", auth.getLogout());
     }
 
     @Transactional
